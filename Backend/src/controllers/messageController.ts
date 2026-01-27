@@ -31,13 +31,13 @@ type MessageResponse = {
 };
 
 const db = getFirestore();
-const roomsCollection = db.collection<RoomRecord>('rooms');
-const messagesCollection = db.collection<MessageRecord>('messages');
+const roomsCollection = db.collection('rooms');
+const messagesCollection = db.collection('messages');
 
 const serializeMessage = (
-  doc: FirebaseFirestore.DocumentSnapshot<MessageRecord>
+  doc: FirebaseFirestore.DocumentSnapshot
 ): MessageResponse => {
-  const data = doc.data();
+  const data = doc.data() as MessageRecord | undefined;
 
   if (!data) {
     throw new Error('Message data missing');

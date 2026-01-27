@@ -64,13 +64,13 @@ type PresenceEntry = {
 const roomPresence = new Map<string, Map<string, PresenceEntry>>();
 const db = getFirestore();
 const firebaseAuth = getFirebaseAuth();
-const roomsCollection = db.collection<RoomRecord>('rooms');
-const messagesCollection = db.collection<MessageRecord>('messages');
+const roomsCollection = db.collection('rooms');
+const messagesCollection = db.collection('messages');
 
 const formatMessage = (
-  doc: FirebaseFirestore.DocumentSnapshot<MessageRecord>
+  doc: FirebaseFirestore.DocumentSnapshot
 ): MessagePayload => {
-  const data = doc.data();
+  const data = doc.data() as MessageRecord | undefined;
 
   if (!data) {
     throw new Error('Message data missing');

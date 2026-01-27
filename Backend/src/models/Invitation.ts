@@ -28,9 +28,9 @@ export type InvitationResponse = {
 };
 
 export const serializeInvitation = (
-  doc: FirebaseFirestore.DocumentSnapshot<InvitationRecord>
+  doc: FirebaseFirestore.DocumentSnapshot
 ): InvitationResponse => {
-  const data = doc.data();
+  const data = doc.data() as InvitationRecord | undefined;
 
   if (!data) {
     throw new Error('Invitation data missing');

@@ -9,8 +9,8 @@ import { InvitationRecord, serializeInvitation } from '../models/Invitation';
 import { RoomRecord } from './roomController';
 
 const db = getFirestore();
-const roomsCollection = db.collection<RoomRecord>('rooms');
-const invitationsCollection = db.collection<InvitationRecord>('invitations');
+const roomsCollection = db.collection('rooms');
+const invitationsCollection = db.collection('invitations');
 
 const MAX_INVITES_PER_REQUEST = 25;
 const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/i;
@@ -81,11 +81,11 @@ export const sendRoomInvitations = async (
       return;
     }
 
-    const createdInvites: FirebaseFirestore.DocumentSnapshot<InvitationRecord>[] = [];
+    const createdInvites: FirebaseFirestore.DocumentSnapshot[] = [];
     const skipped: { email: string; reason: string }[] = [];
 
     for (const email of normalizedEmails) {
-      let docRef: FirebaseFirestore.DocumentReference<InvitationRecord> | null = null;
+      let docRef: FirebaseFirestore.DocumentReference | null = null;
 
       try {
         const pendingKey = buildPendingLookupKey(roomId, email);
@@ -140,7 +140,7 @@ export const sendRoomInvitations = async (
 
 const fetchInvitationByToken = async (
   token: string
-): Promise<FirebaseFirestore.QueryDocumentSnapshot<InvitationRecord> | null> => {
+): Promise<FirebaseFirestore.QueryDocumentSnapshot | null> => {
   const snapshot = await invitationsCollection.where('token', '==', token).limit(1).get();
   return snapshot.empty ? null : snapshot.docs[0];
 };
