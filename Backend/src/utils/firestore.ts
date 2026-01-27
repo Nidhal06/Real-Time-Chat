@@ -13,7 +13,7 @@ export type StoredMember = {
 export type MemberStore = Record<string, StoredMember> | StoredMember[] | undefined;
 
 export const timestampToIsoString = (
-  value?: FirebaseFirestore.Timestamp | Timestamp | Date | string | null
+  value?: FirebaseFirestore.Timestamp | FirebaseFirestore.FieldValue | Timestamp | Date | string | null
 ): string => {
   if (!value) {
     return new Date().toISOString();

@@ -31,8 +31,8 @@ type MessageResponse = {
 };
 
 const db = getFirestore();
-const roomsCollection = db.collection('rooms');
-const messagesCollection = db.collection('messages');
+const roomsCollection = db.collection<RoomRecord>('rooms');
+const messagesCollection = db.collection<MessageRecord>('messages');
 
 const serializeMessage = (
   doc: FirebaseFirestore.DocumentSnapshot<MessageRecord>

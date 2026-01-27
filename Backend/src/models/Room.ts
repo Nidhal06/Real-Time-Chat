@@ -40,7 +40,7 @@ roomSchema.index({ name: 1 }, { unique: true });
 
 roomSchema.set('toJSON', {
   virtuals: true,
-  transform: (_doc, ret) => {
+  transform: (_doc, ret: any) => {
     ret.id = ret._id;
     delete ret._id;
     delete ret.__v;

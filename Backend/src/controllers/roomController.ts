@@ -48,7 +48,7 @@ const normalizePasswordValue = (value?: string | null): string =>
   typeof value === 'string' ? value : '';
 
 const db = getFirestore();
-const roomsCollection = db.collection('rooms');
+const roomsCollection = db.collection<RoomRecord>('rooms');
 
 const serializeRoom = (doc: FirebaseFirestore.DocumentSnapshot<RoomRecord>): RoomResponse => {
   const data = doc.data();

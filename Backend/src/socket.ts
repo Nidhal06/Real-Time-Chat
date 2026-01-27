@@ -64,8 +64,8 @@ type PresenceEntry = {
 const roomPresence = new Map<string, Map<string, PresenceEntry>>();
 const db = getFirestore();
 const firebaseAuth = getFirebaseAuth();
-const roomsCollection = db.collection('rooms');
-const messagesCollection = db.collection('messages');
+const roomsCollection = db.collection<RoomRecord>('rooms');
+const messagesCollection = db.collection<MessageRecord>('messages');
 
 const formatMessage = (
   doc: FirebaseFirestore.DocumentSnapshot<MessageRecord>
@@ -133,18 +133,20 @@ const removePresence = (roomId: string, userId: string, socketId: string): void 
 };
 
 const resolveMemberProfile = (
-  room: { members: Record<string, StoredMember>; admins: Record<string, StoredMember> },
+  room: { members?: MemberStore; admins?: MemberStore },
   user: AuthUser
 ): StoredMember => {
-  const existing = room.members[user.id];
+  const { map: memberMap } = normalizeMemberStore(room.members, 'member');
+  const { map: adminMap } = normalizeMemberStore(room.admins, 'admin');
+  const existing = memberMap[user.id];
   if (existing) {
     return existing;
   }
 
-  return buildMemberSnapshot(user, room.admins[user.id] ? 'admin' : 'member');
+  return buildMemberSnapshot(user, adminMap[user.id] ? 'admin' : 'member');
 };
 
-const extractToken = (socket: Parameters<TypedServer['use']>[0][0]): string | null => {
+const extractToken = (socket: any): string | null => {
   const authHeader = socket.handshake.auth?.token || socket.handshake.headers.authorization;
 
   if (!authHeader) {

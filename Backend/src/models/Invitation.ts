@@ -11,8 +11,8 @@ export type InvitationRecord = {
   status: InvitationStatus;
   pendingLookupKey?: string | null;
   createdBy: StoredMember;
-  createdAt?: FirebaseFirestore.Timestamp | typeof FieldValue;
-  acceptedAt?: FirebaseFirestore.Timestamp | typeof FieldValue;
+  createdAt?: FirebaseFirestore.Timestamp | FirebaseFirestore.FieldValue;
+  acceptedAt?: FirebaseFirestore.Timestamp | FirebaseFirestore.FieldValue;
   acceptedBy?: StoredMember;
 };
 

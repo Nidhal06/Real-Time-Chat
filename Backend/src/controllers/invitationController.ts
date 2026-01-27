@@ -9,8 +9,8 @@ import { InvitationRecord, serializeInvitation } from '../models/Invitation';
 import { RoomRecord } from './roomController';
 
 const db = getFirestore();
-const roomsCollection = db.collection('rooms');
-const invitationsCollection = db.collection('invitations');
+const roomsCollection = db.collection<RoomRecord>('rooms');
+const invitationsCollection = db.collection<InvitationRecord>('invitations');
 
 const MAX_INVITES_PER_REQUEST = 25;
 const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/i;
