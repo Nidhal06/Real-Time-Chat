@@ -1,4 +1,5 @@
-import { FormEvent, useState } from "react";
+import { useState } from "react";
+import type { FormEvent } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import AuthLayout, {
   AuthForm,
@@ -24,7 +25,7 @@ const Login = (): JSX.Element => {
   const [error, setError] = useState<string | null>(null);
 
   const handleSubmit = async (
-    event: FormEvent<HTMLFormElement>
+    event: FormEvent<HTMLFormElement>,
   ): Promise<void> => {
     event.preventDefault();
     setError(null);
@@ -81,6 +82,7 @@ const Login = (): JSX.Element => {
       title="Sign in to continue"
       subtitle="Slide back into your live rooms and private chats."
       heroTagline="Live threads, living energy"
+      heroSupport="Two characters floating through speech bubbles signal the lively vibe awaiting inside."
       toggleHint="Need an account?"
       toggleLabel="Create account"
       inactiveTitle="New collaborator?"

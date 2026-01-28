@@ -1,4 +1,5 @@
-import { FormEvent, useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
+import type { FormEvent } from "react";
 import { useNavigate } from "react-router-dom";
 import axiosClient from "../api/axiosClient";
 import { useAuth } from "../context/AuthContext";
@@ -97,12 +98,12 @@ const Rooms = (): JSX.Element => {
   const [roomForm, setRoomForm] = useState(initialRoomForm);
   const roomStats = useMemo<RoomStat[]>(() => {
     const privateCount = rooms.filter(
-      (entry) => entry.type === "private"
+      (entry) => entry.type === "private",
     ).length;
     const openCount = rooms.length - privateCount;
     const memberCount = rooms.reduce(
       (sum, room) => sum + (room.members?.length ?? 0),
-      0
+      0,
     );
 
     return [
@@ -153,7 +154,7 @@ const Rooms = (): JSX.Element => {
   }, [loadRooms]);
 
   const handleCreateRoom = async (
-    event: FormEvent<HTMLFormElement>
+    event: FormEvent<HTMLFormElement>,
   ): Promise<void> => {
     event.preventDefault();
     if (!roomForm.name.trim()) {
@@ -201,10 +202,10 @@ const Rooms = (): JSX.Element => {
     async (roomId: string, password?: string): Promise<void> => {
       await axiosClient.post(
         `/rooms/${roomId}/join`,
-        password ? { password } : {}
+        password ? { password } : {},
       );
     },
-    []
+    [],
   );
 
   const handleJoinRoom = async (room: Room): Promise<void> => {

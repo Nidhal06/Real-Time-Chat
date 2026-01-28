@@ -1,4 +1,5 @@
-import { FormEvent, useState } from "react";
+import { useState } from "react";
+import type { FormEvent } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import AuthLayout, {
   AuthForm,
@@ -24,7 +25,7 @@ const Register = (): JSX.Element => {
   const [error, setError] = useState<string | null>(null);
 
   const handleSubmit = async (
-    event: FormEvent<HTMLFormElement>
+    event: FormEvent<HTMLFormElement>,
   ): Promise<void> => {
     event.preventDefault();
     setError(null);

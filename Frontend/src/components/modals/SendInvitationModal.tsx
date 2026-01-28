@@ -1,4 +1,5 @@
-import { FormEvent, useMemo, useState } from "react";
+import { useMemo, useState } from "react";
+import type { FormEvent } from "react";
 import {
   Overlay,
   Modal,
@@ -43,7 +44,7 @@ const SendInvitationModal = ({
   }
 
   const handleSubmit = async (
-    event: FormEvent<HTMLFormElement>
+    event: FormEvent<HTMLFormElement>,
   ): Promise<void> => {
     event.preventDefault();
     if (emails.length === 0) {
@@ -61,7 +62,7 @@ const SendInvitationModal = ({
       setSuccess(
         `Sent ${result.invitations.length} invitation${
           result.invitations.length === 1 ? "" : "s"
-        } for ${roomName}.`
+        } for ${roomName}.`,
       );
       setValue("");
       setSkipped(result.skipped);

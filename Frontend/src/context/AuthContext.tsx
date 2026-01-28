@@ -1,5 +1,4 @@
 import {
-  ReactNode,
   createContext,
   useCallback,
   useContext,
@@ -7,6 +6,7 @@ import {
   useMemo,
   useState,
 } from "react";
+import type { ReactNode } from "react";
 import {
   GoogleAuthProvider,
   FacebookAuthProvider,
@@ -66,7 +66,7 @@ export const AuthProvider = ({ children }: AuthProviderProps): JSX.Element => {
     return storedUser ? (JSON.parse(storedUser) as AuthUser) : null;
   });
   const [token, setToken] = useState<string | null>(() =>
-    localStorage.getItem(TOKEN_STORAGE_KEY)
+    localStorage.getItem(TOKEN_STORAGE_KEY),
   );
   const [loading, setLoading] = useState(true);
 
@@ -101,7 +101,7 @@ export const AuthProvider = ({ children }: AuthProviderProps): JSX.Element => {
     async ({ email, password }: AuthCredentials): Promise<void> => {
       await signInWithEmailAndPassword(auth, email, password);
     },
-    []
+    [],
   );
 
   const register = useCallback(
@@ -113,12 +113,12 @@ export const AuthProvider = ({ children }: AuthProviderProps): JSX.Element => {
       const credential = await createUserWithEmailAndPassword(
         auth,
         email,
-        password
+        password,
       );
       await updateProfile(credential.user, { displayName: name.trim() });
       await credential.user.getIdToken(true);
     },
-    []
+    [],
   );
 
   const loginWithGoogle = useCallback(async (): Promise<void> => {
@@ -159,7 +159,7 @@ export const AuthProvider = ({ children }: AuthProviderProps): JSX.Element => {
       logout,
       token,
       user,
-    ]
+    ],
   );
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
