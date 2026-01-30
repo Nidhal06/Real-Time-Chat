@@ -1,43 +1,7 @@
-import nodemailer from 'nodemailer';
-import sgMail from '@sendgrid/mail';
+// email.ts
+import { Resend } from 'resend';
 
-let cachedTransporter: nodemailer.Transporter | null = null;
-let sendGridAvailable = false;
-
-// Init SendGrid when key provided
-const initSendGrid = (): void => {
-  const key = process.env.SENDGRID_API_KEY;
-  if (key) {
-    sgMail.setApiKey(key);
-    sendGridAvailable = true;
-  }
-};
-initSendGrid();
-
-const resolveTransporter = (): nodemailer.Transporter => {
-  if (cachedTransporter) {
-    return cachedTransporter;
-  }
-
-  const host = process.env.SMTP_HOST;
-  const port = Number(process.env.SMTP_PORT ?? 587);
-  const user = process.env.SMTP_USER;
-  const pass = process.env.SMTP_PASS;
-  const secure = process.env.SMTP_SECURE === 'true';
-
-  if (!host || !port || !user || !pass) {
-    throw new Error('SMTP configuration missing. Set SMTP_HOST, SMTP_PORT, SMTP_USER, SMTP_PASS.');
-  }
-
-  cachedTransporter = nodemailer.createTransport({
-    host,
-    port,
-    secure,
-    auth: { user, pass },
-  });
-
-  return cachedTransporter;
-};
+const resend = new Resend(process.env.RESEND_API_KEY);
 
 export type InvitationEmailPayload = {
   to: string;
@@ -52,37 +16,42 @@ export const sendInvitationEmail = async ({
   invitedBy,
   inviteLink,
 }: InvitationEmailPayload): Promise<void> => {
-  const from = process.env.INVITE_EMAIL_FROM;
-  if (!from) throw new Error('INVITE_EMAIL_FROM env var missing');
 
-  const subject = `You're invited to join "${roomName}"`;
-  const html = `
-    <p>Hello,</p>
-    <p><strong>${invitedBy}</strong> invited you to join the private room <strong>${roomName}</strong>.</p>
-    <p>This link is unique to <strong>${to}</strong> and will grant you access without entering the room password.</p>
-    <p style="margin:24px 0;">
-      <a href="${inviteLink}" style="background-color:#4f46e5;color:#ffffff;padding:12px 20px;border-radius:6px;text-decoration:none;font-weight:600;">Accept Invitation</a>
-    </p>
-    <p>If you were not expecting this email, you can safely ignore it.</p>
-  `;
-
-  const text = [
-    `${invitedBy} invited you to join the private room "${roomName}".`,
-    'This invitation is linked to your email address and will let you skip the password.',
-    `Accept here: ${inviteLink}`,
-  ].join('\n\n');
-
-  // Prefer SendGrid when configured (works on Render)
-  if (sendGridAvailable) {
-    try {
-      await sgMail.send({ to, from, subject, text, html });
-      return;
-    } catch (err) {
-      console.error('SendGrid send failed, falling back to SMTP', err);
-      // fallback to SMTP
-    }
+  if (!process.env.RESEND_API_KEY) {
+    throw new Error('❌ RESEND_API_KEY is missing');
   }
 
-  // Fallback (useful for local dev)
-  await resolveTransporter().sendMail({ from, to, subject, text, html });
+  const subject = `You're invited to join "${roomName}"`;
+
+  const html = `
+    <div style="font-family: Arial, sans-serif; line-height:1.6;">
+      <h2>You're invited to a chat room!</h2>
+      <p><strong>${invitedBy}</strong> invited you to join:</p>
+      <p><strong>${roomName}</strong></p>
+      <p style="margin:24px 0;">
+        <a href="${inviteLink}"
+           style="background:#4f46e5;color:#fff;padding:12px 20px;
+                  text-decoration:none;border-radius:6px;font-weight:600;">
+          Join Room
+        </a>
+      </p>
+      <p>If the button doesn’t work, open this link:</p>
+      <p>${inviteLink}</p>
+    </div>
+  `;
+
+  console.log('📨 Sending invitation via Resend:', to);
+
+  const result = await resend.emails.send({
+    from: 'Chat App <onboarding@resend.dev>', // works immediately
+    to,
+    subject,
+    html,
+  });
+
+  if (result.error) {
+    throw new Error(`❌ Resend failed: ${result.error.message}`);
+  }
+
+  console.log('✅ Invitation sent successfully to', to);
 };
