@@ -15,7 +15,7 @@
     "mongoose": "^9.1.5",
     "nodemailer": "^6.10.1",
     "socket.io": "^4.7.5",
-    "@sendgrid/mail": "^8.17.0"
+    "@sendgrid/mail": "^8.9.0"
   },
   "devDependencies": {
     "@types/cors": "^2.8.17",
