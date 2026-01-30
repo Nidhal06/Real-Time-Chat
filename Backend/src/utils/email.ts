@@ -1,6 +1,18 @@
 import nodemailer from 'nodemailer';
+import sgMail from '@sendgrid/mail';
 
 let cachedTransporter: nodemailer.Transporter | null = null;
+let sendGridAvailable = false;
+
+// Init SendGrid when key provided
+const initSendGrid = (): void => {
+  const key = process.env.SENDGRID_API_KEY;
+  if (key) {
+    sgMail.setApiKey(key);
+    sendGridAvailable = true;
+  }
+};
+initSendGrid();
 
 const resolveTransporter = (): nodemailer.Transporter => {
   if (cachedTransporter) {
@@ -21,10 +33,7 @@ const resolveTransporter = (): nodemailer.Transporter => {
     host,
     port,
     secure,
-    auth: {
-      user,
-      pass,
-    },
+    auth: { user, pass },
   });
 
   return cachedTransporter;
@@ -44,10 +53,7 @@ export const sendInvitationEmail = async ({
   inviteLink,
 }: InvitationEmailPayload): Promise<void> => {
   const from = process.env.INVITE_EMAIL_FROM;
-
-  if (!from) {
-    throw new Error('INVITE_EMAIL_FROM env var missing');
-  }
+  if (!from) throw new Error('INVITE_EMAIL_FROM env var missing');
 
   const subject = `You're invited to join "${roomName}"`;
   const html = `
@@ -66,11 +72,17 @@ export const sendInvitationEmail = async ({
     `Accept here: ${inviteLink}`,
   ].join('\n\n');
 
-  await resolveTransporter().sendMail({
-    from,
-    to,
-    subject,
-    text,
-    html,
-  });
+  // Prefer SendGrid when configured (works on Render)
+  if (sendGridAvailable) {
+    try {
+      await sgMail.send({ to, from, subject, text, html });
+      return;
+    } catch (err) {
+      console.error('SendGrid send failed, falling back to SMTP', err);
+      // fallback to SMTP
+    }
+  }
+
+  // Fallback (useful for local dev)
+  await resolveTransporter().sendMail({ from, to, subject, text, html });
 };
