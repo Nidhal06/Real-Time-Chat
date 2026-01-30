@@ -6,7 +6,7 @@ export const USER_STORAGE_KEY = 'realtime_chat_user';
 const baseUrl = import.meta.env.VITE_API_URL ?? 'http://localhost:5000';
 
 const axiosClient = axios.create({
-  baseURL: `${baseUrl.replace(/\/$/, '')}/api`,
+  baseURL: `${baseUrl.replace(/\/$/, '')}`,
   headers: {
     'Content-Type': 'application/json',
   },
