@@ -11,7 +11,6 @@ import {
   HeroCopyBlock,
   HeroGlow,
   HeroImageWrapper,
-  HeroSupport,
   HeroToggle,
   HeroToggleButton,
   MobileToggle,
@@ -25,7 +24,6 @@ type AuthLayoutProps = {
   title: string;
   subtitle: string;
   heroTagline: string;
-  heroSupport: string;
   toggleLabel: string;
   toggleHint: string;
   inactiveTitle: string;
@@ -39,7 +37,6 @@ const AuthLayout = ({
   title,
   subtitle,
   heroTagline,
-  heroSupport,
   toggleLabel,
   toggleHint,
   inactiveTitle,
@@ -81,7 +78,6 @@ const AuthLayout = ({
             <small>{heroTagline}</small>
             <h3>{inactiveTitle}</h3>
             <p>{inactiveCopy}</p>
-            <HeroSupport>{heroSupport}</HeroSupport>
           </HeroCopyBlock>
 
           <HeroToggle>

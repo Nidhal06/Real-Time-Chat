@@ -1,4 +1,5 @@
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import PasswordPromptModal from "../components/modals/PasswordPromptModal";
 import type { FormEvent } from "react";
 import { useNavigate } from "react-router-dom";
 import axiosClient from "../api/axiosClient";
@@ -96,6 +97,14 @@ const Rooms = (): JSX.Element => {
   const [error, setError] = useState<string | null>(null);
   const [creating, setCreating] = useState(false);
   const [roomForm, setRoomForm] = useState(initialRoomForm);
+  const [passwordPromptOpen, setPasswordPromptOpen] = useState(false);
+  const [passwordPromptRoomName, setPasswordPromptRoomName] = useState<
+    string | null
+  >(null);
+  const passwordPromptResolveRef = useRef<((value?: string) => void) | null>(
+    null,
+  );
+
   const roomStats = useMemo<RoomStat[]>(() => {
     const privateCount = rooms.filter(
       (entry) => entry.type === "private",
@@ -214,18 +223,25 @@ const Rooms = (): JSX.Element => {
     let providedPassword: string | undefined =
       readRoomPassword(room.id) ?? undefined;
 
-    const promptForPassword = (): string | undefined => {
-      const input = window.prompt(`Enter the password for ${room.name}`);
-      if (!input?.trim()) {
-        setError("Room password is required to join private rooms.");
-        return undefined;
-      }
-      return input.trim();
+    const promptForPassword = (
+      roomName: string,
+    ): Promise<string | undefined> => {
+      setError(null);
+      setPasswordPromptRoomName(roomName);
+      setPasswordPromptOpen(true);
+      return new Promise((resolve) => {
+        passwordPromptResolveRef.current = resolve;
+      });
     };
 
-    if (needsPassword && !providedPassword) {
-      providedPassword = promptForPassword();
+    const isMember = Boolean(room.members?.some((m) => m.id === user?.id));
+
+    // If the room is private and the current user isn't a known member, prompt for the password.
+    // If the user is already a member, don't ask for the password — allow join without it.
+    if (needsPassword && !providedPassword && !isMember) {
+      providedPassword = await promptForPassword(room.name);
       if (!providedPassword) {
+        setError("Room password is required to join private rooms.");
         return;
       }
     }
@@ -248,8 +264,9 @@ const Rooms = (): JSX.Element => {
 
       if (passwordRequired) {
         clearRoomPassword(room.id);
-        const retryPassword = promptForPassword();
+        const retryPassword = await promptForPassword(room.name);
         if (!retryPassword) {
+          setError("Room password is required to join private rooms.");
           return;
         }
 
@@ -453,7 +470,11 @@ const Rooms = (): JSX.Element => {
                     type="button"
                     onClick={() => void handleJoinRoom(room)}
                   >
-                    {room.type === "private" ? "Unlock room" : "Join room"}
+                    {room.type === "private"
+                      ? room.members?.some((m) => m.id === user?.id)
+                        ? "Enter room"
+                        : "Unlock room"
+                      : "Join room"}
                   </JoinButton>
                 </RoomCard>
               ))}
@@ -461,6 +482,22 @@ const Rooms = (): JSX.Element => {
           )}
         </RoomList>
       </Grid>
+      <PasswordPromptModal
+        open={passwordPromptOpen}
+        roomName={passwordPromptRoomName ?? undefined}
+        onClose={() => {
+          setPasswordPromptOpen(false);
+          setPasswordPromptRoomName(null);
+          passwordPromptResolveRef.current?.(undefined);
+          passwordPromptResolveRef.current = null;
+        }}
+        onSubmit={(password) => {
+          setPasswordPromptOpen(false);
+          setPasswordPromptRoomName(null);
+          passwordPromptResolveRef.current?.(password);
+          passwordPromptResolveRef.current = null;
+        }}
+      />
     </Shell>
   );
 };

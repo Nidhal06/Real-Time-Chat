@@ -82,7 +82,6 @@ const Login = (): JSX.Element => {
       title="Sign in to continue"
       subtitle="Slide back into your live rooms and private chats."
       heroTagline="Live threads, living energy"
-      heroSupport="Two characters floating through speech bubbles signal the lively vibe awaiting inside."
       toggleHint="Need an account?"
       toggleLabel="Create account"
       inactiveTitle="New collaborator?"

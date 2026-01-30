@@ -1,4 +1,5 @@
-import { useMemo, useState } from "react";
+import { useMemo, useState, useEffect } from "react";
+import { createPortal } from "react-dom";
 import type { FormEvent } from "react";
 import {
   Overlay,
@@ -31,6 +32,16 @@ const SendInvitationModal = ({
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
   const [skipped, setSkipped] = useState<SendInvitationResult["skipped"]>([]);
+
+  // lock document body scroll while modal is open
+  useEffect(() => {
+    if (!open) return;
+    const original = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+    return () => {
+      document.body.style.overflow = original;
+    };
+  }, [open]);
 
   const emails = useMemo(() => {
     return value
@@ -78,11 +89,11 @@ const SendInvitationModal = ({
     }
   };
 
-  return (
+  const markup = (
     <Overlay>
-      <Modal>
+      <Modal role="dialog" aria-modal="true" aria-labelledby="invite-title">
         <header>
-          <h3>Invite teammates to {roomName}</h3>
+          <h3 id="invite-title">Invite teammates to {roomName}</h3>
           <button type="button" onClick={onClose} aria-label="Close">
             ×
           </button>
@@ -126,6 +137,8 @@ const SendInvitationModal = ({
       </Modal>
     </Overlay>
   );
+
+  return createPortal(markup, document.body);
 };
 
 export default SendInvitationModal;

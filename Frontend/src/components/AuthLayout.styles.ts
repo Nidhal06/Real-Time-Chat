@@ -46,7 +46,6 @@ export const Backdrop = styled.div`
 export const ContentGrid = styled.section`
   width: min(1060px, 100%);
   display: flex;
-  flex-direction: column;
   gap: 1.25rem;
   position: relative;
   border-radius: clamp(1.5rem, 3vw, 2.5rem);
@@ -195,11 +194,6 @@ export const HeroCopyBlock = styled.div`
   }
 `;
 
-export const HeroSupport = styled.p`
-  margin-top: 0.55rem;
-  font-size: 0.9rem;
-  color: rgba(15, 23, 42, 0.7);
-`;
 
 export const HeroToggle = styled.div`
   margin-top: auto;

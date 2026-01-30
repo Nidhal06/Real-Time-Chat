@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import PasswordPromptModal from "../components/modals/PasswordPromptModal";
 import { useNavigate, useParams } from "react-router-dom";
 import { io, Socket } from "socket.io-client";
 import ChatBox from "../components/ChatBox";
@@ -90,6 +91,13 @@ const ChatRoom = (): JSX.Element => {
   const [sending, setSending] = useState(false);
   const [memberQuery, setMemberQuery] = useState("");
   const [inviteModalOpen, setInviteModalOpen] = useState(false);
+  const [passwordPromptOpen, setPasswordPromptOpen] = useState(false);
+  const [passwordPromptRoomName, setPasswordPromptRoomName] = useState<
+    string | null
+  >(null);
+  const passwordPromptResolveRef = useRef<((value?: string) => void) | null>(
+    null,
+  );
 
   const adminIds = useMemo(() => {
     const ids = new Set<string>();
@@ -117,12 +125,12 @@ const ChatRoom = (): JSX.Element => {
 
       const { data } = await axiosClient.post<RoomDetails>(
         `/rooms/${roomId}/join`,
-        password ? { password } : {}
+        password ? { password } : {},
       );
 
       return data;
     },
-    [roomId]
+    [roomId],
   );
 
   useEffect(() => {
@@ -133,7 +141,7 @@ const ChatRoom = (): JSX.Element => {
     let active = true;
 
     const joinRoomWithPassword = async (
-      inputPassword?: string
+      inputPassword?: string,
     ): Promise<void> => {
       try {
         const data = await attemptHttpJoin(inputPassword);
@@ -164,10 +172,21 @@ const ChatRoom = (): JSX.Element => {
             clearRoomPassword(roomId);
           }
 
-          const promptValue = window.prompt("Enter the room password to join");
+          // prompt via modal
+          setPasswordPromptRoomName(room?.name ?? null);
+          setPasswordPromptOpen(true);
+          const promptValue = await new Promise<string | undefined>(
+            (resolve) => {
+              passwordPromptResolveRef.current = resolve;
+            },
+          );
 
           if (!promptValue?.trim()) {
             setBanner("Room password required to join this conversation.");
+            // make sure to clear modal state if still open
+            setPasswordPromptOpen(false);
+            setPasswordPromptRoomName(null);
+            passwordPromptResolveRef.current = null;
             return;
           }
 
@@ -227,7 +246,7 @@ const ChatRoom = (): JSX.Element => {
         if (targetRoom === roomId) {
           setOnlineUsers(users);
         }
-      }
+      },
     );
 
     socketInstance.on("notification", (payload: NotificationPayload) => {
@@ -296,7 +315,7 @@ const ChatRoom = (): JSX.Element => {
     }
 
     return decoratedOnline.filter((member) =>
-      member.name.toLowerCase().includes(normalizedQuery)
+      member.name.toLowerCase().includes(normalizedQuery),
     );
   }, [decoratedOnline, normalizedQuery]);
 
@@ -306,7 +325,7 @@ const ChatRoom = (): JSX.Element => {
     }
 
     return offlineUsers.filter((member) =>
-      member.name.toLowerCase().includes(normalizedQuery)
+      member.name.toLowerCase().includes(normalizedQuery),
     );
   }, [offlineUsers, normalizedQuery]);
 
@@ -361,12 +380,12 @@ const ChatRoom = (): JSX.Element => {
 
       const { data } = await axiosClient.post<SendInvitationResult>(
         `/rooms/${roomId}/invitations`,
-        { emails }
+        { emails },
       );
 
       return data;
     },
-    [roomId]
+    [roomId],
   );
 
   const handleNavigateBack = (): void => {
@@ -512,6 +531,23 @@ const ChatRoom = (): JSX.Element => {
           onSubmit={handleSendInvitations}
         />
       ) : null}
+
+      <PasswordPromptModal
+        open={passwordPromptOpen}
+        roomName={passwordPromptRoomName ?? undefined}
+        onClose={() => {
+          setPasswordPromptOpen(false);
+          setPasswordPromptRoomName(null);
+          passwordPromptResolveRef.current?.(undefined);
+          passwordPromptResolveRef.current = null;
+        }}
+        onSubmit={(password) => {
+          setPasswordPromptOpen(false);
+          setPasswordPromptRoomName(null);
+          passwordPromptResolveRef.current?.(password);
+          passwordPromptResolveRef.current = null;
+        }}
+      />
     </Shell>
   );
 };

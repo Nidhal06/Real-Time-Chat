@@ -8,7 +8,7 @@ export const Overlay = styled.div`
   justify-content: center;
   background: rgba(3, 6, 18, 0.85);
   backdrop-filter: blur(6px);
-  z-index: 1000;
+  z-index: 10000;
 `;
 
 export const Modal = styled.div`

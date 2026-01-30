@@ -82,7 +82,6 @@ const Register = (): JSX.Element => {
       title="Join the conversation"
       subtitle="Spin up a profile and unlock live rooms, invites, and shared archives."
       heroTagline="New energy, same room"
-      heroSupport="Two characters floating through speech bubbles signal the lively vibe awaiting inside."
       toggleHint="Already have an account?"
       toggleLabel="Sign in"
       inactiveTitle="Returning member?"

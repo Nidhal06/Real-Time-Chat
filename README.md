@@ -1,85 +1,69 @@
-# Real-Time Chat Application ⚡️
+# Real-Time Chat ⚡️
 
-**Realtime chat app with Firebase-backed persistence and auth, Socket.IO for live messaging, and a React + Vite frontend.**
-
----
-
-## 🚀 Overview
-
-This repository implements a full-stack realtime chat application:
-
-- Backend: Node.js + Express + TypeScript using the Firebase Admin SDK (Firestore) for data and Firebase Auth for authentication. Socket.IO provides realtime messaging and presence.
-- Frontend: React + Vite + TypeScript using the Firebase Web SDK for authentication, Axios for REST calls, and Socket.IO client for realtime updates.
-
-Key features:
-
-- Create, list, join, and leave chat rooms (public or private)
-- Password-protected private rooms with invitation-by-email flow
-- Realtime messaging (Socket.IO) and message history (Firestore)
-- Invitation links that let invited users accept access without a room password
+**A small, full-stack realtime chat app built with Firebase (Firestore + Auth), Socket.IO, Express + TypeScript, and a React + Vite frontend.**
 
 ---
 
-## 🧭 Tech Stack
+## 🚀 Quick summary
 
-- Backend: Node.js, Express, TypeScript, Firebase Admin (Firestore & Auth), Socket.IO, Nodemailer
+- Realtime messaging powered by Socket.IO.
+- Persistent data and auth handled by Firebase (Admin SDK on the server, Web SDK on the client).
+- Private rooms support password protection and an invitation-by-email flow.
+- Clean, TypeScript-first codebase split into `Backend/` and `Frontend/` for easy local development and deployment.
+
+---
+
+## ✅ Notable details (what I found)
+
+- Backend uses the Firebase Admin SDK (Firestore and Auth) and Socket.IO for realtime features.
+- The frontend ships *default demo Firebase config values* so the app can be run locally with minimal setup.
+- `mongoose` appears in `Backend/package.json` but the codebase stores data in Firestore (no active Mongo usage).
+
+---
+
+## 📁 Repository layout
+
+```
+realtime-chat/
+├─ Backend/        # Express + Socket.IO server (TypeScript)
+│  ├─ src/
+│  │  ├─ config/    # Firebase init
+│  │  ├─ controllers/
+│  │  ├─ middleware/
+│  │  ├─ routes/
+│  │  ├─ socket.ts
+│  │  └─ server.ts
+│  └─ package.json
+├─ Frontend/       # React + Vite client (TypeScript)
+│  ├─ src/
+│  │  ├─ api/
+│  │  ├─ components/
+│  │  └─ pages/
+│  └─ package.json
+└─ README.md
+```
+
+---
+
+## 🧰 Tech stack
+
+- Backend: Node.js, Express, TypeScript, Firebase Admin (Firestore + Auth), Socket.IO, Nodemailer
 - Frontend: React, TypeScript, Vite, Firebase Web SDK, Socket.IO client, Styled Components
 
 ---
 
-## 📁 Project Structure
+## 🛠 Environment & configuration
 
-```
-root/
-├── Backend/                # Express + Socket.IO server
-│   ├── src/
-│   │   ├── config/         # Firebase initialization (service account)
-│   │   ├── controllers/    # REST endpoints logic
-│   │   ├── middleware/     # auth + error handling
-│   │   ├── routes/         # API route definitions
-│   │   ├── utils/          # helpers (email, firestore helpers)
-│   │   ├── socket.ts       # Socket.IO handlers
-│   │   └── server.ts       # app + server bootstrap
-│   └── package.json
-├── Frontend/               # React client
-│   ├── src/
-│   │   ├── api/            # axios instance (auth token injection)
-│   │   ├── context/        # Auth context using Firebase
-│   │   ├── components/     # UI components (ChatBox, modals…)
-│   │   └── pages/          # App pages (Rooms, ChatRoom, Invite accept…)
-│   └── package.json
-└── README.md
-```
+Two `.env` files (one per project) are expected for local development. Keep secrets out of source control.
 
----
-
-## 🔧 Environment & Configuration
-
-### Backend (.env)
-
-The backend uses the Firebase Admin SDK and an SMTP transporter to send invitations. Create a `.env` file in `Backend/` with the following variables:
-
-- FIREBASE_PROJECT_ID
-- FIREBASE_CLIENT_EMAIL
-- FIREBASE_PRIVATE_KEY (use literal newlines encoded as `\n` when storing in .env)
-- FIREBASE_STORAGE_BUCKET (optional)
-- CLIENT_URL (comma-separated allowed origins, e.g. `http://localhost:5173`)
-- PORT (default: 5000)
-- SMTP_HOST
-- SMTP_PORT (default: 587)
-- SMTP_USER
-- SMTP_PASS
-- SMTP_SECURE (set to `true` if using SMTPS)
-- INVITE_EMAIL_FROM (email address used as the "from" header for invites)
-
-Example (use your values):
+Backend (Backend/.env)
 
 ```env
 PORT=5000
 CLIENT_URL=http://localhost:5173
 FIREBASE_PROJECT_ID=your-project-id
 FIREBASE_CLIENT_EMAIL=xxxx@xxxx.iam.gserviceaccount.com
-FIREBASE_PRIVATE_KEY="-----BEGIN PRIVATE KEY-----\nXXX\n-----END PRIVATE KEY-----\n"
+FIREBASE_PRIVATE_KEY="-----BEGIN PRIVATE KEY-----\n...\n-----END PRIVATE KEY-----\n"
 INVITE_EMAIL_FROM="noreply@example.com"
 SMTP_HOST=smtp.example.com
 SMTP_PORT=587
@@ -88,17 +72,7 @@ SMTP_PASS=your-smtp-pass
 SMTP_SECURE=false
 ```
 
-> Note: The app currently expects the Firebase service account values to be provided via environment variables (no local JSON file required).
-
-### Frontend (.env)
-
-Create a `.env` file in `Frontend/` to override defaults when needed:
-
-- VITE_API_URL (e.g. `http://localhost:5000`)
-- VITE_SOCKET_URL (optional; falls back to VITE_API_URL)
-- VITE_FIREBASE_* (API key, auth domain, etc — the repo includes sensible defaults for local dev)
-
-Example:
+Frontend (Frontend/.env)
 
 ```env
 VITE_API_URL=http://localhost:5000
@@ -107,11 +81,13 @@ VITE_FIREBASE_API_KEY=...
 VITE_FIREBASE_PROJECT_ID=...
 ```
 
+Tip: The frontend already includes a set of demo `VITE_FIREBASE_*` values for quick local testing; replace them with your project's config for production.
+
 ---
 
-## ▶️ Development (Run locally)
+## ▶️ Run locally
 
-Backend
+1. Start the backend
 
 ```bash
 cd Backend
@@ -119,9 +95,7 @@ npm install
 npm run dev
 ```
 
-- Starts the server with `ts-node-dev` (watch + restart).
-
-Frontend
+2. Start the frontend
 
 ```bash
 cd Frontend
@@ -129,106 +103,96 @@ npm install
 npm run dev
 ```
 
-- Vite dev server runs (default `http://localhost:5173`).
-
-Build for production
-
-- Backend: `npm run build` then run `node dist/server.js` in `Backend`
-- Frontend: `npm run build` in `Frontend` (Vite)
+Default ports: Backend -> `5000`, Frontend (Vite) -> `5173`.
 
 ---
 
-## 🔐 Authentication
+## 🔐 Auth & tokens
 
-- The frontend uses Firebase Authentication (Web SDK) for user sign-in.
-- For REST API requests, the client sets an Authorization header: `Authorization: Bearer <Firebase ID token>`.
-- For Socket.IO, the client passes the same ID token in the socket `auth` payload (see `ChatRoom.tsx`).
-- The backend verifies tokens using the Firebase Admin SDK and populates `req.user` with a normalized user object.
+- Users sign in using Firebase Authentication (client-side Web SDK).
+- The frontend stores the ID token and attaches it to REST requests (`Authorization: Bearer <token>`).
+- Socket.IO connections pass the ID token in the `auth` payload when connecting; the server verifies it via Firebase Admin.
 
 ---
 
-## 📡 API Endpoints (summary)
+## 📡 API summary
 
-All endpoints are prefixed with `/api` (axios client is configured to attach `/api`).
+Base path: `/api`
 
 Auth
-
-- GET /api/auth/me — Get current authenticated user (requires Authorization header)
+- GET `/api/auth/me` — returns the current authenticated user (auth required)
 
 Rooms
-
-- GET /api/rooms — List all rooms (auth required)
-- POST /api/rooms — Create a room (auth required)
-- POST /api/rooms/:roomId/join — Join a room (supply password for private rooms)
-- POST /api/rooms/:roomId/leave — Leave a room
-- POST /api/rooms/:roomId/invitations — Send invitations by email (admin only)
+- GET `/api/rooms` — list rooms
+- POST `/api/rooms` — create a room
+- POST `/api/rooms/:roomId/join` — join a room (provide password for private rooms)
+- POST `/api/rooms/:roomId/leave` — leave a room
+- POST `/api/rooms/:roomId/invitations` — send invites (admin only)
 
 Messages
-
-- GET /api/messages/:roomId — Get messages for a room (auth + membership required)
-- POST /api/messages/:roomId — Send a message via REST (socket endpoint exists; REST is also supported)
+- GET `/api/messages/:roomId` — get room messages
+- POST `/api/messages/:roomId` — send a message via REST
 
 Invitations
+- GET `/api/invitations/:token` — inspect invitation
+- POST `/api/invitations/:token/accept` — accept invite (auth required)
 
-- GET /api/invitations/:token — Fetch invitation details (no auth required)
-- POST /api/invitations/:token/accept — Accept invitation (auth required; links invited email to the logged-in account)
+(See `Backend/src/routes` for full routing details.)
 
 ---
 
-## 🔁 Socket.IO (Realtime)
+## 🔁 Socket.IO (realtime)
 
-Connection
-
-- Client connects with an auth token: io(url, { auth: { token } })
-- Server validates Firebase ID token and populates socket.data.user
+Client connection: `io(SOCKET_URL, { auth: { token } })`
 
 Client -> Server events
-
-- join_room: { roomId }
-- leave_room: { roomId }
-- send_message: { roomId, content }
+- `join_room` { roomId }
+- `leave_room` { roomId }
+- `send_message` { roomId, content }
 
 Server -> Client events
+- `message_history` — list of messages after join
+- `new_message` — new message broadcast
+- `room_users` — presence updates
+- `notification` — informational messages
 
-- message_history: Message[] — emitted upon joining a room
-- new_message: Message — emitted to room when a message is created
-- room_users: { roomId, users } — presence updates
-- notification: { roomId?, message } — informational notices
-
-Message shape
-
-- { id, room, content, sender: { id, name, email, avatar?, role }, createdAt }
+Messages include: `{ id, room, content, sender, createdAt }` where `sender` contains id/name/email/role.
 
 ---
 
-## ✉️ Invitation Flow
+## ✉️ Invitation flow
 
-- Room admins can send invitation emails (up to 25 at once).
-- Each invitation contains a unique token linked to the target email and room.
-- When a recipient visits `/invite/accept/:token` they can view the invite; after signing in, the client POSTs to `/api/invitations/:token/accept` to add them to the room (bypassing password).
-- Invitations auto-expire / become unusable if the room is deleted or the token is marked accepted.
+- Admins create/send invitation emails to one or more addresses.
+- Recipient gets a token link to accept the invite; the client POSTs `/api/invitations/:token/accept` after signing in to add the user to the room (bypassing password).
 
 ---
 
-## ⚠️ Notes & Caveats
+## ⚠️ Notes & tips
 
-- Although `Backend/src/config/db.ts` references `MONGO_URI`, the app uses Firestore for persistence — MongoDB/Mongoose are not used in the current code paths.
-- Ensure `FIREBASE_PRIVATE_KEY` in your environment contains encoded newlines (`\n`) or read it from a secure file store if preferred.
-- SMTP must be configured for invitation emails to be sent; for local testing you can use services like Mailtrap or an SMTP test server.
-
----
-
-## 👩‍💻 Contributing
-
-- Fork, create a feature branch, and open a PR with tests and a clear description.
-- Keep environment-sensitive secrets out of the repo; use `.env` or a secrets manager.
+- `Backend/package.json` includes `mongoose` but the repo currently uses Firestore — you can remove `mongoose` if not planning to add Mongo-based features.
+- Keep `FIREBASE_PRIVATE_KEY` safe and use encoded newlines (`\n`) in `.env` files.
+- For testing email, use Mailtrap or a similar service.
 
 ---
 
-## 📝 License
+## ✅ Suggested next improvements
 
-This project is provided under the MIT license (check the repository or add a LICENSE file if needed).
+- Add `Backend/.env.example` and `Frontend/.env.example` files (I can add these on request).
+- Add a `LICENSE` file if you want explicit licensing.
+- Add simple integration tests for API and socket flows.
 
 ---
 
-If you'd like, I can also add an example `.env.example` for the Backend and Frontend to make onboarding easier. ✅
+## 🙌 Contributing
+
+- Fork → feature branch → PR. Add tests where applicable and avoid committing secrets.
+
+---
+
+## 📜 License
+
+MIT (add `LICENSE` file to the repo to make this explicit)
+
+---
+
+If you'd like, I can create `Backend/.env.example` and `Frontend/.env.example` files, and add a short troubleshooting section to the README. ✅
